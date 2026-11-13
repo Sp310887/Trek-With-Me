@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Trek With Me{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --forest: #214228;
+            --pine: #3d6b3a;
+            --moss: #7ca86c;
+            --lime: #c4d277;
+            --gold: #d9a24d;
+            --amber: #da8c34;
+            --snow: #f5f3ef;
+            --stone: #a8987f;
+            --rock: #6f655b;
+            --night: #132913;
+            --mist: rgba(245,243,239,0.08);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: linear-gradient(135deg, #122811 0%, #2f5b30 100%);
+            color: var(--snow);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* NAVBAR */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 1rem 3rem;
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(18,41,17,0.95) 0%, transparent 100%);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(161,197,107,0.15);
+        }
+        .nav-logo {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .nav-logo img {
+            height: 42px;
+            width: auto;
+            display: block;
+        }
+        .footer-brand img {
+            height: 42px;
+            width: auto;
+            display: block;
+        }
+        .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+        .nav-links a {
+            color: var(--snow);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+            background: var(--lime);
+            transition: width 0.3s;
+        }
+        .nav-links a:hover { color: var(--lime); }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-cta {
+            background: var(--moss);
+            color: white !important;
+            padding: 0.5rem 1.4rem;
+            border-radius: 2px;
+            letter-spacing: 2px;
+        }
+        .nav-cta:hover { background: var(--lime) !important; color: var(--forest) !important; }
+        .nav-user { color: var(--gold) !important; }
+
+        /* FLASH MESSAGES */
+        .flash-container { position: fixed; top: 80px; right: 1rem; z-index: 2000; }
+        .flash {
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            animation: slideIn 0.3s ease;
+        }
+        .flash.success { background: var(--moss); border-left: 4px solid var(--lime); }
+        .flash.error { background: #7c1a1a; border-left: 4px solid #e84a4a; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.8rem 2rem;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: none; cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+        .btn-primary { background: var(--moss); color: white; }
+        .btn-primary:hover { background: var(--lime); color: var(--forest); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(74,124,35,0.4); }
+        .btn-gold { background: var(--gold); color: var(--forest); }
+        .btn-gold:hover { background: var(--amber); transform: translateY(-2px); }
+        .btn-outline { background: transparent; color: var(--snow); border: 2px solid var(--snow); }
+        .btn-outline:hover { background: var(--snow); color: var(--forest); }
+        .btn-danger { background: #7c1a1a; color: white; }
+        .btn-danger:hover { background: #e84a4a; }
+
+        /* CARDS */
+        .trek-card {
+            background: rgba(23,40,60,0.75);
+            border: 1px solid rgba(161,197,107,0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.4s;
+            position: relative;
+        }
+        .trek-card:hover { transform: translateY(-8px); border-color: rgba(139,195,74,0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .trek-card img { width: 100%; height: 240px; object-fit: cover; transition: transform 0.6s; }
+        .trek-card:hover img { transform: scale(1.05); }
+        .card-body { padding: 1.5rem; }
+        .card-badge {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 2px;
+            margin-bottom: 0.8rem;
+        }
+        .badge-easy { background: #2d6a2d; color: #a8e6a8; }
+        .badge-moderate { background: #6a5a1a; color: #f4d68a; }
+        .badge-hard { background: #6a2d2d; color: #f4a8a8; }
+        .badge-expert { background: #1a1a6a; color: #a8a8f4; }
+        .card-title { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 1.6rem; letter-spacing: 2px; margin-bottom: 0.5rem; color: var(--snow); }
+        .card-location { color: var(--lime); font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 1rem; }
+        .card-meta { display: flex; gap: 1.5rem; font-size: 0.75rem; color: rgba(245,243,239,0.6); margin-bottom: 1rem; }
+        .card-price { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 1.8rem; color: var(--gold); }
+
+        /* PAGE HERO */
+        .page-hero {
+            height: 50vh;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .page-hero-bg {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center;
+            filter: brightness(0.4);
+        }
+        .page-hero-content { position: relative; text-align: center; }
+        .page-hero h1 { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 5rem; letter-spacing: 6px; line-height: 1; }
+        .page-hero p { font-size: 0.9rem; letter-spacing: 3px; color: var(--lime); margin-top: 0.5rem; text-transform: uppercase; }
+
+        /* FOOTER */
+        footer {
+            background: var(--forest);
+            border-top: 1px solid rgba(139,195,74,0.2);
+            padding: 3rem;
+            margin-top: 6rem;
+        }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem; margin-bottom: 2rem; }
+        .footer-brand { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 2rem; color: var(--lime); letter-spacing: 3px; margin-bottom: 1rem; }
+        .footer-desc { font-size: 0.85rem; color: rgba(245,243,239,0.5); line-height: 1.8; }
+        .footer-heading { font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; font-weight: 700; }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 0.5rem; }
+        .footer-links a { color: rgba(245,243,239,0.5); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; }
+        .footer-links a:hover { color: var(--lime); }
+        .footer-bottom { border-top: 1px solid rgba(139,195,74,0.1); padding-top: 1.5rem; text-align: center; font-size: 0.75rem; color: rgba(245,243,239,0.3); }
+
+        /* SECTION */
+        .section { padding: 6rem 3rem; }
+        .section-title { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 3.5rem; letter-spacing: 4px; margin-bottom: 0.5rem; }
+        .section-subtitle { color: var(--lime); font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 3rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 2rem; }
+
+        /* FORM STYLES */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--lime); margin-bottom: 0.5rem; font-weight: 600; }
+        .form-control {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(113,134,153,0.25);
+            color: #18212d;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            outline: none;
+        }
+        .form-control:focus { border-color: var(--pine); background: rgba(255,255,255,0.98); box-shadow: 0 0 0 3px rgba(161,197,107,0.12); }
+        .form-control option { background: #f5f3ef; color: #18212d; }
+
+        /* STARS */
+        .stars { color: var(--gold); font-size: 0.9rem; }
+
+        /* RESPONSIVE */
+        @media(max-width:768px){
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            .grid-3,.grid-4 { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .section { padding: 4rem 1rem; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .page-hero h1 { font-size: 3rem; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Flash Messages -->
+<div class="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+        <div class="flash {{ cat }}"><i class="fas fa-{{ 'check-circle' if cat=='success' else 'exclamation-circle' }}"></i> {{ msg }}</div>
+        {% endfor %}
+    {% endwith %}
+</div>
+
+{% if show_nav|default(true) %}
+<!-- Navbar -->
+<nav>
+    <a href="/" class="nav-logo">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Trek WithMe logo">
+    </a>
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/treks">Treks</a></li>
+        <li><a href="/sos">SOS</a></li>
+        <li><a href="/feedback">Feedback</a></li>
+        <li><a href="/contact">Contact</a></li>
+        {% if user %}
+            {% if user.role == 'admin' %}
+            <li><a href="/admin">Admin Dashboard</a></li>
+            {% else %}
+            <li><a href="/my-bookings">My Bookings</a></li>
+            {% endif %}
+            <li><a href="/logout" class="nav-user"><i class="fas fa-user"></i> {{ user.name.split()[0] }}</a></li>
+        {% else %}
+            <li><a href="/login">Login</a></li>
+            <li><a href="/register" class="nav-cta">Register</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<!-- Footer -->
+<footer>
+    <div class="footer-grid">
+        <div>
+            <div class="footer-brand"><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Trek WithMe logo"></div>
+            <p class="footer-desc">Discover the world's most breathtaking trails. We connect adventurers with unforgettable mountain experiences, complete safety support, and authentic homestays.</p>
+        </div>
+        <div>
+            <div class="footer-heading">Explore</div>
+            <ul class="footer-links">
+                <li><a href="/treks">All Treks</a></li>
+                <li><a href="/treks?difficulty=Easy">Easy Treks</a></li>
+                <li><a href="/treks?difficulty=Hard">Hard Treks</a></li>
+                <li><a href="/contact">Contact Us</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-heading">Safety</div>
+            <ul class="footer-links">
+                <li><a href="/sos"><i class="fas fa-exclamation-triangle"></i> SOS Emergency</a></li>
+                <li><a href="#">Trek Guidelines</a></li>
+                <li><a href="#">Weather Updates</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2024 Trek With Me · "Push Your Limits" · Made with ❤️ for adventurers</div>
+</footer>
+
+<script>
+    // Auto-hide flash messages
+    setTimeout(() => {
+        document.querySelectorAll('.flash').forEach(el => el.style.opacity = '0');
+    }, 4000);
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

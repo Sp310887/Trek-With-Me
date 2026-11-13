@@ -1,48 +1,114 @@
-# Trek With Me 🏔️
-### Push Your Limits
+# ⛰️ Trek With Me
+### "Push Your Limits" — A Full-Stack Trekking Web Application
 
-## 📌 About the Project
-Trek With Me is a trekking and travel management web application designed to help users explore trekking destinations, view trek details, plan adventures, and manage their bookings easily.
+---
 
-## 🎯 Objectives
-- Provide information about trekking destinations.
-- Help users explore available treks.
-- Make trek booking simple and convenient.
-- Provide a user-friendly interface.
-- Manage user bookings and details.
+## 🚀 Quick Setup Guide
+
+### 1. Prerequisites
+- Python 3.8+
+- MySQL 8.0+
+- pip
+
+### 2. Install Python Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Set Up MySQL Database
+1. Open MySQL Workbench or terminal
+2. Run the database script:
+```sql
+source database.sql
+```
+Or copy-paste the contents of `database.sql` into MySQL.
+
+### 4. Configure Database Connection
+Open `app.py` and update the DB_CONFIG section:
+```python
+DB_CONFIG = {
+    'host': 'localhost',
+    'database': 'trek_with_me',
+    'user': 'root',
+    'password': 'YOUR_MYSQL_PASSWORD'  # ← Change this
+}
+```
+
+### 5. Run the Application
+```bash
+python app.py
+```
+Open your browser at: **http://localhost:5000**
+
+> Note: This project is a Flask app, not a Streamlit app. Do not use `streamlit run app.py`.
+
+---
+
+## 👤 Demo Credentials
+
+| Role  | Email                    | Password  |
+|-------|--------------------------|-----------|
+| User  | (use your own account)   | (your password) |
+
+---
+
+## 📁 Project Structure
+
+```
+trek_with_me/
+├── app.py               # Flask backend (all routes)
+├── database.sql         # MySQL schema + seed data
+├── requirements.txt     # Python dependencies
+├── README.md
+└── templates/
+    ├── base.html        # Base layout + navbar + footer
+    ├── index.html       # Home page with hero + featured treks
+    ├── treks.html       # Trek listing with filters + distance
+    ├── trek_detail.html # Single trek detail page
+    ├── register.html    # User registration
+    ├── login.html       # User login
+    ├── booking.html     # Trek booking form
+    ├── payment.html     # UPI payment (demo)
+    ├── my_bookings.html # User booking history
+    ├── sos.html         # SOS emergency page
+    ├── contact.html     # Contact form
+    └── admin.html       # Admin dashboard
+```
+
+---
 
 ## ✨ Features
-- User Registration and Login
-- Trek Destination Exploration
-- Trek Details and Information
-- Online Trek Booking
-- Booking Management
-- Admin Dashboard
 
-## 🛠️ Technologies Used
-- Python
-- HTML
-- CSS
-- MySQL
-- JavaScript (if used)
+| Module             | Description                                              |
+|--------------------|----------------------------------------------------------|
+| 🏠 Home            | Hero with parallax, featured treks, smart recommendations|
+| 🗺️ Trek Listing    | Filter by difficulty, search, GPS distance display       |
+| 📋 Trek Detail     | Full info, homestay options, distance calculator         |
+| 👤 Auth            | Register, Login, Logout with session management          |
+| 📅 Booking         | Date, people, homestay selection with price calculator   |
+| 💳 Payment         | Demo UPI QR code payment with countdown timer            |
+| 🆘 SOS             | GPS location SOS alert, emergency contacts               |
+| 📞 Contact         | Contact form with message storage                        |
+| 🔐 Admin           | Full dashboard: treks, bookings, users, messages, SOS    |
+| 🧠 Recommendations | Smart API endpoint filtering by difficulty + budget      |
 
-## ⚙️ Installation
-1. Clone this repository.
-2. Open the project folder in VS Code.
-3. Install the required dependencies.
-4. Configure the database.
-5. Run the project.
+---
 
-## 🚀 Future Enhancements
-- Online payment integration
-- Live location tracking
-- More trekking destinations
-- Mobile-friendly interface
+## 🛠️ Technology Stack
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Backend**: Python + Flask
+- **Database**: MySQL
+- **APIs**: Geolocation API (distance calculation)
+- **Fonts**: Bebas Neue, Montserrat, Playfair Display
+- **Icons**: Font Awesome 6
 
-## 👩‍💻 Developed By
-Spoorti Mohan Hegde
+---
 
-BCA Student
+## 🎨 Design Theme
+- **Color Palette**: Forest greens, mountain gold, night sky dark
+- **Typography**: Bebas Neue (display), Montserrat (body)
+- **Style**: Dark adventurous aesthetic with parallax backgrounds
 
-## 📄 License
-This project is licensed under the MIT License.
+---
+
+*Made with ❤️ for adventurers · Trek With Me © 2024*

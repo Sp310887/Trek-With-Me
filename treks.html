@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Explore Treks — Trek With Me{% endblock %}
+{% block extra_css %}
+<style>
+.filter-bar {
+    background: rgba(26,46,26,0.7);
+    border-bottom: 1px solid rgba(139,195,74,0.15);
+    padding: 1.5rem 3rem;
+    display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    position: sticky; top: 80px; z-index: 100;
+    backdrop-filter: blur(8px);
+}
+.filter-bar input, .filter-bar select {
+    background: rgba(13,27,13,0.8);
+    border: 1px solid rgba(139,195,74,0.2);
+    color: var(--snow);
+    padding: 0.6rem 1rem;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 0.85rem;
+    border-radius: 2px;
+    outline: none;
+}
+.filter-bar input:focus, .filter-bar select:focus { border-color: var(--lime); }
+.filter-bar input { width: 260px; }
+.trek-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+.distance-tag {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(13,27,13,0.85);
+    border: 1px solid var(--lime);
+    color: var(--lime);
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    padding: 0.3rem 0.7rem;
+    border-radius: 2px;
+    display: none;
+}
+.trek-card { position: relative; }
+@media(max-width:900px){ .trek-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:600px){ .trek-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+    <div class="page-hero">
+        <div class="page-hero-bg" style="background: linear-gradient(180deg, rgba(13,27,13,0.95), rgba(26,46,26,0.95));"></div>
+        <div class="page-hero-content">
+            <h1>ALL TREKS</h1>
+            <p>Choose your adventure · {{ treks|length }} Routes Available</p>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <form method="GET" action="/treks">
+        <div class="filter-bar">
+            <i class="fas fa-search" style="color:var(--lime)"></i>
+            <input type="text" name="search" placeholder="Search by name or location..." value="{{ request.args.get('search','') }}">
+            <select name="difficulty" onchange="this.form.submit()">
+                <option value="">All Difficulties</option>
+                <option value="Easy" {% if request.args.get('difficulty')=='Easy' %}selected{% endif %}>Easy</option>
+                <option value="Moderate" {% if request.args.get('difficulty')=='Moderate' %}selected{% endif %}>Moderate</option>
+                <option value="Hard" {% if request.args.get('difficulty')=='Hard' %}selected{% endif %}>Hard</option>
+                <option value="Expert" {% if request.args.get('difficulty')=='Expert' %}selected{% endif %}>Expert</option>
+            </select>
+            <button type="submit" class="btn btn-primary" style="padding:0.6rem 1.5rem">Search</button>
+            <button type="button" class="btn btn-outline" onclick="locateTreks()" style="padding:0.6rem 1.5rem"><i class="fas fa-map-marker-alt"></i> My Location</button>
+            {% if request.args.get('search') or request.args.get('difficulty') %}
+            <a href="/treks" class="btn btn-danger" style="padding:0.6rem 1rem"><i class="fas fa-times"></i> Clear</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="section">
+        {% if treks %}
+        <div class="trek-grid" id="trek-grid">
+            {% for trek in treks %}
+            <div class="trek-card" data-lat="{{ trek.latitude }}" data-lng="{{ trek.longitude }}" data-id="{{ trek.id }}">
+                <div style="overflow:hidden">
+                    <img src="{{ trek.image_url }}" alt="{{ trek.name }}" loading="lazy">
+                </div>
+                <div class="distance-tag" id="dist-{{ trek.id }}"><i class="fas fa-route"></i> <span></span></div>
+                <div class="card-body">
+                    <span class="card-badge badge-{{ trek.difficulty.lower() }}">{{ trek.difficulty }}</span>
+                    <div class="card-title">{{ trek.name }}</div>
+                    <div class="card-location"><i class="fas fa-map-marker-alt"></i> {{ trek.location }}</div>
+                    <p style="font-size:0.82rem; color:rgba(245,243,239,0.55); line-height:1.7; margin-bottom:1rem;">{{ trek.description[:120] }}...</p>
+                    <div class="card-meta">
+                        <span><i class="fas fa-clock"></i> {{ trek.duration_days }} Days</span>
+                        <span><i class="fas fa-mountain"></i> {{ trek.max_altitude }}</span>
+                        <span class="stars">★ {{ trek.rating }}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.2rem; padding-top:1rem; border-top:1px solid rgba(139,195,74,0.1)">
+                        <div>
+                            <span style="font-size:0.65rem;color:rgba(245,243,239,0.35)">FROM</span><br>
+                            <span class="card-price">₹{{ "{:,.0f}".format(trek.price) }}</span>
+                        </div>
+                        <div style="display:flex; gap:0.5rem;">
+                            <a href="/trek/{{ trek.id }}" class="btn btn-outline" style="padding:0.5rem 1rem; font-size:0.7rem">Details</a>
+                            <a href="/book/{{ trek.id }}" class="btn btn-gold" style="padding:0.5rem 1rem; font-size:0.7rem">Book</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:5rem;">
+            <p style="font-size:4rem;">⛰️</p>
+            <h3 style="font-family: Georgia, 'Times New Roman', Times, serif; font-size:2rem; letter-spacing:3px; margin:1rem 0;">No Treks Found</h3>
+            <p style="color:rgba(245,243,239,0.5)">Try adjusting your search filters.</p>
+            <a href="/treks" class="btn btn-primary" style="margin-top:1.5rem">Clear Filters</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2-lat1) * Math.PI/180;
+    const dLon = (lon2-lon1) * Math.PI/180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(0);
+}
+
+function locateTreks() {
+    navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude, longitude } = pos.coords;
+        document.querySelectorAll('.trek-card[data-lat]').forEach(card => {
+            const tLat = parseFloat(card.dataset.lat);
+            const tLng = parseFloat(card.dataset.lng);
+            const id = card.dataset.id;
+            if (tLat && tLng) {
+                const dist = haversineDistance(latitude, longitude, tLat, tLng);
+                const tag = document.getElementById('dist-' + id);
+                tag.style.display = 'block';
+                tag.querySelector('span').textContent = dist + ' km away';
+            }
+        });
+    }, err => alert('Location access denied: ' + err.message));
+}
+</script>
+{% endblock %}

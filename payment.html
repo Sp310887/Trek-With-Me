@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Payment — Trek With Me{% endblock %}
+{% block extra_css %}
+<style>
+.payment-page { padding-top: 80px; min-height: 100vh; display:flex; align-items:center; justify-content:center; }
+.payment-container {
+    max-width: 600px; width: 100%;
+    margin: 3rem auto;
+    padding: 2rem;
+}
+.payment-box {
+    background: rgba(26,46,26,0.7);
+    border: 1px solid rgba(139,195,74,0.2);
+    border-radius: 4px;
+    padding: 2.5rem;
+    animation: fadeUp 0.5s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.payment-title { font-family: Georgia, 'Times New Roman', Times, serif; font-size:2.5rem; letter-spacing:4px; margin-bottom:0.5rem; }
+.amount-display {
+    text-align:center;
+    padding: 2rem;
+    background: rgba(74,124,35,0.1);
+    border: 1px solid rgba(139,195,74,0.2);
+    border-radius: 4px;
+    margin: 1.5rem 0;
+}
+.amount-display .amount { font-family: Georgia, 'Times New Roman', Times, serif; font-size:4rem; color:var(--gold); letter-spacing:3px; line-height:1; }
+.qr-section { text-align:center; padding: 1.5rem; border: 1px dashed rgba(139,195,74,0.3); border-radius:4px; margin: 1.5rem 0; }
+.qr-placeholder {
+    width: 180px; height: 180px;
+    background: white;
+    margin: 0 auto 1rem;
+    border-radius: 8px;
+    display: flex; align-items:center; justify-content:center;
+    overflow: hidden;
+}
+.qr-inner {
+    width: 160px; height: 160px;
+    display: grid; grid-template-columns: repeat(10,1fr);
+    gap: 2px;
+}
+.qr-cell { background: black; }
+.qr-cell.w { background: white; }
+.upi-id { color:var(--lime); font-size:0.85rem; letter-spacing:1px; margin-top:0.5rem; }
+.payment-detail-row { display:flex; justify-content:space-between; padding:0.7rem 0; border-bottom:1px solid rgba(139,195,74,0.08); font-size:0.85rem; }
+.payment-detail-row span:first-child { color:rgba(245,243,239,0.5); }
+.timer { text-align:center; color:var(--gold); font-size:0.9rem; margin:1rem 0; font-weight:600; }
+.payment-options { margin: 1.5rem 0; }
+.method-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; }
+.method-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(139,195,74,0.1);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    color: var(--snow);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: left;
+    font-size: 0.95rem;
+}
+.method-card.active,
+.method-card:hover {
+    border-color: var(--lime);
+    background: rgba(74,124,35,0.16);
+}
+.method-card span { display:block; margin-top:0.35rem; color: rgba(245,243,239,0.65); }
+.detail-box { padding: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(139,195,74,0.1); border-radius: 8px; margin-bottom: 1.5rem; }
+.payment-alert {
+    background: rgba(183, 106, 24, 0.12);
+    border-left: 4px solid var(--gold);
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.5rem;
+    color: rgba(245,243,239,0.9);
+    border-radius: 6px;
+    line-height: 1.5;
+}
+.payment-alert strong { color: var(--lime); }
+.hidden { display:none !important; }
+.success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+.success-card {
+    background: rgba(26,46,26,0.95);
+    border: 1px solid rgba(139,195,74,0.3);
+    border-radius: 14px;
+    padding: 2rem 2.5rem;
+    text-align: center;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+.success-icon { font-size: 3rem; margin-bottom: 1rem; }
+.success-message { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 2rem; margin-bottom: 0.5rem; color: var(--lime); }
+.success-subtitle { color: rgba(245,243,239,0.75); font-size: 0.95rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="payment-page">
+    <div class="payment-container">
+        <div class="payment-box">
+            <p style="color:var(--lime); font-size:0.75rem; letter-spacing:2px; text-transform:uppercase; margin-bottom:0.5rem">✦ Secure Payment</p>
+            <div class="payment-title">Complete Booking</div>
+            <div class="payment-alert">
+                <strong>Dummy payment only:</strong> This page stores your booking and payment details in the system, but no real money is charged. Enter a demo UPI transaction ID to complete the booking.
+            </div>
+            <p style="margin:0.75rem 0 1.5rem; color:rgba(245,243,239,0.7); font-size:0.95rem; line-height:1.6;">
+                This is a dummy payment page. No real transaction occurs. Enter any demo UPI transaction ID to confirm your booking and store payment details in the system.
+            </p>
+            <div class="payment-detail-row"><span>Trek</span><span>{{ booking.trek_name }}</span></div>
+            <div class="payment-detail-row"><span>Date</span><span>{{ booking.trek_date }}</span></div>
+            <div class="payment-detail-row"><span>People</span><span>{{ booking.num_people }}</span></div>
+            {% if booking.homestay_id %}<div class="payment-detail-row"><span>Homestay</span><span>✓ Included</span></div>{% endif %}
+
+            <div class="amount-display">
+                <p style="font-size:0.7rem;letter-spacing:2px;color:rgba(245,243,239,0.4);margin-bottom:0.5rem">TOTAL AMOUNT</p>
+                <div class="amount">₹{{ "{:,.0f}".format(booking.total|float) }}</div>
+            </div>
+
+            <div class="payment-options">
+                <p style="font-size:0.75rem; letter-spacing:2px; color:rgba(245,243,239,0.5); margin-bottom:1rem; text-transform:uppercase">Choose Payment Method</p>
+                <div class="method-grid">
+                    <button type="button" class="method-card active" data-method="upi">UPI<br><span style="font-size:0.75rem; color:rgba(245,243,239,0.65);">Google Pay / PhonePe</span></button>
+                    <button type="button" class="method-card" data-method="card">Card<br><span style="font-size:0.75rem; color:rgba(245,243,239,0.65);">Visa / MasterCard</span></button>
+                </div>
+            </div>
+
+            <div class="method-detail" id="upiDetails">
+                <div class="qr-section">
+                    <p style="font-size:0.75rem; letter-spacing:2px; color:rgba(245,243,239,0.5); margin-bottom:1rem; text-transform:uppercase">Scan & Pay via UPI</p>
+                    <div class="qr-placeholder">
+                        <svg width="160" height="160" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                            <rect width="10" height="10" fill="white"/>
+                            <rect x="0" y="0" width="3" height="3" fill="black"/>
+                            <rect x="1" y="1" width="1" height="1" fill="white"/>
+                            <rect x="7" y="0" width="3" height="3" fill="black"/>
+                            <rect x="8" y="1" width="1" height="1" fill="white"/>
+                            <rect x="0" y="7" width="3" height="3" fill="black"/>
+                            <rect x="1" y="8" width="1" height="1" fill="white"/>
+                            <rect x="4" y="0" width="1" height="1" fill="black"/>
+                            <rect x="4" y="2" width="2" height="1" fill="black"/>
+                            <rect x="3" y="4" width="4" height="1" fill="black"/>
+                            <rect x="4" y="6" width="1" height="1" fill="black"/>
+                            <rect x="6" y="4" width="1" height="3" fill="black"/>
+                            <rect x="8" y="4" width="2" height="1" fill="black"/>
+                            <rect x="8" y="6" width="2" height="1" fill="black"/>
+                            <rect x="3" y="3" width="1" height="1" fill="black"/>
+                            <rect x="5" y="5" width="1" height="1" fill="black"/>
+                            <rect x="9" y="8" width="1" height="2" fill="black"/>
+                        </svg>
+                    </div>
+                    <p class="upi-id">📱 UPI: trekwithme@upi</p>
+                    <p style="font-size:0.7rem; color:rgba(245,243,239,0.3); margin-top:0.5rem">Demo payment — no real charge</p>
+                </div>
+            </div>
+
+            <div class="method-detail hidden" id="cardDetails">
+                <div class="detail-box">
+                    <div class="payment-detail-row"><span>Card Number</span><span>•••• •••• •••• 4242</span></div>
+                    <div class="payment-detail-row"><span>Expiry</span><span>10/30</span></div>
+                    <div class="payment-detail-row"><span>Cardholder</span><span>Demo User</span></div>
+                    <div class="payment-detail-row"><span>CVV</span><span>•••</span></div>
+                    <p style="font-size:0.75rem; color:rgba(245,243,239,0.5); margin-top:1rem">This is a demo card interface. No real transaction will occur.</p>
+                </div>
+            </div>
+
+            <div class="timer" id="timer">⏱ Session expires in: <span id="countdown">10:00</span></div>
+
+            <form method="POST" id="paymentForm">
+                <input type="hidden" name="payment_method" id="payment_method" value="upi">
+                <input type="hidden" name="payment_reference" id="payment_reference" value="">
+                <div class="form-group" style="margin-bottom:1rem;" id="upiInput">
+                    <label class="form-label">UPI Transaction ID (Demo)</label>
+                    <input name="upi_txn" type="text" class="form-control" placeholder="Enter any transaction ID (e.g. TXN123456)" required>
+                </div>
+                <div class="form-row-2 hidden" id="cardInputs">
+                    <div class="form-group"><label class="form-label">Card Number</label><input type="text" class="form-control" placeholder="4242 4242 4242 4242" disabled></div>
+                    <div class="form-group"><label class="form-label">Expiry</label><input type="text" class="form-control" placeholder="10/30" disabled></div>
+                    <div class="form-group"><label class="form-label">CVV</label><input type="text" class="form-control" placeholder="123" disabled></div>
+                </div>
+                <button type="button" class="btn btn-primary" id="payNowButton" style="width:100%;justify-content:center;padding:1.2rem;font-size:1rem">
+                    <i class="fas fa-credit-card"></i> Pay ₹{{ "{:,.0f}".format(booking.total|float) }}
+                </button>
+            </form>
+
+            <div class="success-overlay hidden" id="successOverlay">
+                <div class="success-card">
+                    <div class="success-icon">✅</div>
+                    <div class="success-message">Payment Successful</div>
+                    <div class="success-subtitle">Your booking is confirmed. Redirecting...</div>
+                </div>
+            </div>
+
+            <a href="/treks" style="display:block; text-align:center; margin-top:1rem; color:rgba(245,243,239,0.4); font-size:0.8rem; text-decoration:none;">
+                ← Cancel and go back
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+let secs = 600;
+const timer = document.getElementById('countdown');
+const interval = setInterval(() => {
+    secs--;
+    if (secs <= 0) { clearInterval(interval); timer.textContent = 'EXPIRED'; return; }
+    const m = Math.floor(secs/60).toString().padStart(2,'0');
+    const s = (secs%60).toString().padStart(2,'0');
+    timer.textContent = m + ':' + s;
+}, 1000);
+
+const methodButtons = document.querySelectorAll('.method-card');
+const upiDetails = document.getElementById('upiDetails');
+const cardDetails = document.getElementById('cardDetails');
+const upiInput = document.getElementById('upiInput');
+const cardInputs = document.getElementById('cardInputs');
+const paymentMethodInput = document.getElementById('payment_method');
+const payNowButton = document.getElementById('payNowButton');
+const paymentForm = document.getElementById('paymentForm');
+const successOverlay = document.getElementById('successOverlay');
+
+function selectMethod(method) {
+    paymentMethodInput.value = method;
+    methodButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.method === method);
+    });
+    upiDetails.classList.toggle('hidden', method !== 'upi');
+    cardDetails.classList.toggle('hidden', method !== 'card');
+    upiInput.classList.toggle('hidden', method !== 'upi');
+    cardInputs.classList.toggle('hidden', method !== 'card');
+    if (method === 'upi') {
+        upiInput.querySelector('input').required = true;
+    } else {
+        upiInput.querySelector('input').required = false;
+    }
+}
+
+methodButtons.forEach(button => {
+    button.addEventListener('click', () => selectMethod(button.dataset.method));
+});
+
+payNowButton.addEventListener('click', () => {
+    if (paymentMethodInput.value === 'upi') {
+        const upiTxn = document.querySelector('#upiInput input').value.trim();
+        if (!upiTxn) {
+            alert('Enter a demo UPI transaction ID to continue.');
+            return;
+        }
+        document.getElementById('payment_reference').value = upiTxn;
+    } else {
+        document.getElementById('payment_reference').value = 'DEMO_CARD_TXN';
+    }
+    successOverlay.classList.remove('hidden');
+    setTimeout(() => paymentForm.submit(), 1200);
+});
+</script>
+{% endblock %}

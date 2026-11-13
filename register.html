@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Register — Trek With Me{% endblock %}
+{% block extra_css %}
+<style>
+.auth-page {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding-top: 80px;
+    background: linear-gradient(180deg, rgba(5,10,12,0.92), rgba(3,6,8,0.98)),
+        url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+.auth-page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 40%);
+    pointer-events: none;
+}
+.auth-overlay { position: absolute; inset: 0; background: rgba(3,6,9,0.82); }
+.auth-box {
+    position: relative; z-index: 2;
+    background: rgba(6,12,14,0.92);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 32px;
+    padding: 3.2rem 2.5rem;
+    width: 100%; max-width: 520px;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 38px 90px rgba(0,0,0,0.45);
+    animation: fadeUp 0.55s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+.auth-logo { text-align:center; margin-bottom:1.8rem; font-size:2rem; color: #f8f6f0; }
+.auth-logo span { font-family: Georgia, 'Times New Roman', Times, serif; font-weight: 700; color: var(--lime); }
+.auth-title { font-family: Georgia, 'Times New Roman', Times, serif; font-size:2.7rem; letter-spacing:0.2px; text-align:center; margin-bottom:0.5rem; color:#f8f6f0; }
+.auth-sub { text-align:center; font-size:0.95rem; color:rgba(245,243,239,0.78); letter-spacing:0.8px; margin-bottom:1rem; text-transform: uppercase; }
+.auth-chip { display:inline-flex; align-items:center; justify-content:center; margin:0 auto 2rem; padding:0.45rem 1rem; background: rgba(139,195,74,0.14); border: 1px solid rgba(139,195,74,0.22); border-radius: 999px; color: var(--lime); font-size:0.82rem; letter-spacing:1px; text-transform: uppercase; font-weight:700; }
+.auth-footer { text-align:center; margin-top:1.5rem; font-size:0.88rem; color:rgba(245,243,239,0.65); }
+.auth-footer a { color:var(--lime); text-decoration:none; font-weight:700; }
+.otp-row { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: flex-end; }
+.otp-row input { margin-bottom: 0; }
+.otp-buttons { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.otp-buttons button { border-radius: 999px; font-size: 0.9rem; letter-spacing: 0.5px; padding: 0.8rem 1rem; }
+.otp-panel { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 1rem 1.2rem; margin-bottom: 1rem; color: rgba(245,243,239,0.85); font-size: 0.92rem; }
+.form-label { font-family: Georgia, 'Times New Roman', Times, serif; letter-spacing: 0.5px; color: rgba(245,243,239,0.82); }
+.auth-logo img { height: 42px; width: auto; display: block; margin: 0 auto; }
+.btn-primary { background: linear-gradient(135deg, #8bc34a, #f4a622); border: none; }
+.btn-outline { border-color: rgba(255,255,255,0.18); color: #f5f3ef; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-overlay"></div>
+    <div class="auth-box">
+        <div class="auth-logo"><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Trek WithMe logo"></div>
+        <div class="auth-title">Join The Journey</div>
+        <div class="auth-sub">Create your adventure account with mobile verification</div>
+        <div class="auth-chip">Verified mobile access</div>
+        <div class="otp-panel" id="otp-panel">Enter your mobile number and request OTP to verify your account.</div>
+        <form method="POST" id="register-form">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-control" placeholder="Your full name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control" placeholder="you@email.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" name="phone" class="form-control" id="phone-input" placeholder="+91 98765 43210" required>
+            </div>
+            <div class="form-group">
+                <div class="otp-row">
+                    <input type="text" name="otp" id="otp-code" class="form-control" placeholder="Enter OTP" disabled>
+                    <button type="button" class="btn btn-outline" id="send-otp-btn" onclick="sendOTP()">Send OTP</button>
+                </div>
+            </div>
+            <div class="form-group otp-buttons">
+                <button type="button" class="btn btn-primary" id="verify-otp-btn" onclick="verifyOTP()" disabled>Verify OTP</button>
+            </div>
+            <input type="hidden" name="otp_verified" id="otp-verified" value="0">
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Min 6 characters" required>
+            </div>
+            <button type="submit" class="btn btn-primary" id="register-btn" style="width:100%; justify-content:center; margin-top:0.5rem" disabled>
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+        </form>
+        <div class="auth-footer">Already have an account? <a href="/login">Sign In</a></div>
+        <script>
+            const registerForm = document.getElementById('register-form');
+            registerForm.addEventListener('submit', function(event) {
+                const email = this.email.value.trim();
+                const password = this.password.value;
+                const emailPattern = /^[\w.-]+@[\w.-]+\.\w+$/;
+                if (!emailPattern.test(email)) {
+                    alert('Please enter a valid email address.');
+                    event.preventDefault();
+                    return;
+                }
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters long.');
+                    event.preventDefault();
+                    return;
+                }
+            });
+
+            let generatedOtp = '';
+            function sendOTP() {
+                const phone = document.getElementById('phone-input').value.trim();
+                const panel = document.getElementById('otp-panel');
+                if (!phone) {
+                    panel.textContent = 'Enter your phone number before requesting OTP.';
+                    panel.style.color = '#f4d6b6';
+                    return;
+                }
+                generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                panel.innerHTML = 'OTP sent to ' + phone + '. <strong style="color:#8bc34a">Use code: ' + generatedOtp + '</strong> (demo only).';
+                panel.style.color = '#f4f4f0';
+                document.getElementById('otp-code').disabled = false;
+                document.getElementById('verify-otp-btn').disabled = false;
+                document.getElementById('register-btn').disabled = true;
+                document.getElementById('otp-verified').value = '0';
+            }
+            function verifyOTP() {
+                const entered = document.getElementById('otp-code').value.trim();
+                const panel = document.getElementById('otp-panel');
+                if (!entered) {
+                    panel.textContent = 'Enter the OTP you received to verify your phone.';
+                    return;
+                }
+                if (entered === generatedOtp) {
+                    panel.innerHTML = '<span style="color:#8bc34a">Mobile verified successfully. You can now create your account.</span>';
+                    document.getElementById('otp-verified').value = '1';
+                    document.getElementById('register-btn').disabled = false;
+                    document.getElementById('verify-otp-btn').disabled = true;
+                } else {
+                    panel.textContent = 'OTP did not match. Please try again.';
+                    panel.style.color = '#ffb4b4';
+                }
+            }
+            document.getElementById('register-form').addEventListener('submit', function(event) {
+                if (document.getElementById('otp-verified').value !== '1') {
+                    event.preventDefault();
+                    const panel = document.getElementById('otp-panel');
+                    panel.textContent = 'Please verify your phone with OTP before submitting.';
+                    panel.style.color = '#ffb4b4';
+                }
+            });
+        </script>
+    </div>
+</div>
+{% endblock %}

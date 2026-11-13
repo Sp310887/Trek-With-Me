@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Feedback — Trek With Me{% endblock %}
+{% block extra_css %}
+<style>
+.feedback-page { padding-top: 100px; background: linear-gradient(180deg, #07100f 0%, #0b1915 100%); }
+.feedback-container { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; }
+.feedback-info h1 { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 3.4rem; letter-spacing: 0.5px; line-height: 1.05; margin-bottom: 1.2rem; color: #f5f3ef; }
+.feedback-info p { color: rgba(245,243,239,0.78); line-height: 1.9; font-size: 1rem; margin-bottom: 2rem; max-width: 680px; }
+.feedback-item { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.5rem; }
+.feedback-item-icon { width: 52px; height: 52px; background: rgba(255,255,255,0.08); border: 1px solid rgba(139,195,74,0.18); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--lime); flex-shrink: 0; font-size: 1.1rem; }
+.feedback-item-info h4 { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--lime); margin-bottom: 0.35rem; font-weight: 700; }
+.feedback-item-info p { color: rgba(245,243,239,0.72); font-size: 0.95rem; margin: 0; line-height: 1.7; }
+.feedback-form-box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 3rem; box-shadow: 0 30px 70px rgba(0,0,0,0.35); }
+.feedback-form-box h2 { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 2rem; letter-spacing: 0.5px; margin-bottom: 2rem; color: #f4f4f0; }
+.feedback-form-box .form-label { font-family: Georgia, 'Times New Roman', Times, serif; letter-spacing: 1px; color: rgba(245,243,239,0.75); }
+.feedback-form-box .form-control { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #fff; }
+.feedback-form-box .form-control::placeholder { color: rgba(255,255,255,0.6); }
+.rating-stars { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.star { font-size: 1.5rem; color: #ddd; cursor: pointer; transition: color 0.3s; }
+.star:hover, .star.active { color: var(--gold); }
+@media(max-width:768px){ .feedback-container { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="feedback-page">
+    <div class="page-hero">
+        <div class="page-hero-bg" style="background: linear-gradient(135deg, rgba(8,17,14,0.65), rgba(7,10,12,0.95)), url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; filter: brightness(0.55);"></div>
+        <div class="page-hero-content">
+            <h1 style="font-family: Georgia, 'Times New Roman', Times, serif; font-size:3.2rem; letter-spacing:0.6px; margin-bottom:0.8rem;">Share Your Feedback</h1>
+            <p style="font-family: Georgia, 'Times New Roman', Times, serif; color:rgba(245,243,239,0.8); font-size:1rem; letter-spacing:0.8px;">Help us improve your trekking experience</p>
+        </div>
+    </div>
+
+    <div class="feedback-container">
+        <div class="feedback-info">
+            <p class="section-subtitle">✦ Your Voice Matters</p>
+            <h1>Your Feedback<br>Shapes Our Future</h1>
+            <p>We value your honest feedback about your trekking experiences with us. Whether it's about our treks, guides, homestays, or overall service, your input helps us create better adventures for everyone.</p>
+
+            <div class="feedback-item">
+                <div class="feedback-item-icon"><i class="fas fa-star"></i></div>
+                <div class="feedback-item-info">
+                    <h4>Rate Your Experience</h4>
+                    <p>Share your overall satisfaction with our services</p>
+                </div>
+            </div>
+            <div class="feedback-item">
+                <div class="feedback-item-icon"><i class="fas fa-comments"></i></div>
+                <div class="feedback-item-info">
+                    <h4>Tell Us More</h4>
+                    <p>Provide detailed feedback about what we did well or areas for improvement</p>
+                </div>
+            </div>
+            <div class="feedback-item">
+                <div class="feedback-item-icon"><i class="fas fa-heart"></i></div>
+                <div class="feedback-item-info">
+                    <h4>Help Us Grow</h4>
+                    <p>Your suggestions help us enhance our trekking experiences</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="feedback-form-box">
+            <h2>Submit Your Feedback</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Full name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="you@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Rate Your Experience</label>
+                    <select name="rating" class="form-control" required>
+                        <option value="">Select rating</option>
+                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                        <option value="4">⭐⭐⭐⭐ Very Good</option>
+                        <option value="3">⭐⭐⭐ Good</option>
+                        <option value="2">⭐⭐ Fair</option>
+                        <option value="1">⭐ Poor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your Feedback</label>
+                    <textarea name="feedback" class="form-control" rows="5" placeholder="Tell us about your experience, suggestions for improvement, or anything else you'd like to share..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:1rem">
+                    <i class="fas fa-paper-plane"></i> Submit Feedback
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

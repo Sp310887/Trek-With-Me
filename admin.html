@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — Trek With Me{% endblock %}
+{% block extra_css %}
+<style>
+.admin-page { padding-top: 80px; min-height: 100vh; }
+.admin-container { max-width: 1400px; margin: 0 auto; padding: 2rem 3rem; }
+.admin-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; }
+.admin-header h1 { font-family: Georgia, 'Times New Roman', Times, serif; font-size:3rem; letter-spacing:4px; }
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; margin-bottom:3rem; }
+.stat-card {
+    background: rgba(48,74,54,0.82);
+    border: 1px solid rgba(139,195,74,0.2);
+    border-radius: 4px;
+    padding: 1.8rem;
+    position: relative; overflow: hidden;
+    transition: all 0.3s;
+}
+.stat-card:hover { border-color: var(--lime); transform: translateY(-4px); }
+.stat-card .big-num { font-family: Georgia, 'Times New Roman', Times, serif; font-size:3.5rem; color:var(--gold); line-height:1; }
+.stat-card .label { font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:rgba(245,243,239,0.4); margin-top:0.3rem; }
+.stat-card .icon { position:absolute; bottom:1rem; right:1.5rem; font-size:3rem; opacity:0.08; }
+.tabs { display:flex; gap:0; margin-bottom:2rem; border-bottom:1px solid rgba(139,195,74,0.15); }
+.tab {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+    color: rgba(245,243,239,0.5);
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+.tab.active { color: var(--lime); border-bottom-color: var(--lime); }
+.tab:hover { color: var(--snow); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.admin-table { width:100%; border-collapse:collapse; }
+.admin-table th { padding:0.8rem 1rem; text-align:left; font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--lime); border-bottom:1px solid rgba(139,195,74,0.2); }
+.admin-table td { padding:0.9rem 1rem; font-size:0.85rem; border-bottom:1px solid rgba(139,195,74,0.07); vertical-align:middle; }
+.admin-table tr:hover td { background:rgba(48,74,54,0.45); }
+.admin-table img { width:60px; height:40px; object-fit:cover; border-radius:2px; }
+.badge-admin { color: var(--gold); font-weight:700; }
+.badge-user { color: var(--lime); font-weight:700; }
+.status-active { color: #e84a4a; font-weight:700; }
+.status-resolved { color: var(--lime); font-weight:700; }
+.add-trek-form {
+    background: rgba(48,74,54,0.55);
+    border: 1px solid rgba(139,195,74,0.15);
+    border-radius: 4px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+.add-trek-form h3 { font-family: Georgia, 'Times New Roman', Times, serif; font-size:1.5rem; letter-spacing:2px; margin-bottom:1.5rem; color:var(--lime); }
+.form-row-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="admin-page">
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <p style="color:var(--lime); font-size:0.75rem; letter-spacing:2px; text-transform:uppercase">✦ Control Panel</p>
+                <h1>Admin Dashboard</h1>
+            </div>
+            <div style="font-size:0.85rem; color:rgba(245,243,239,0.5)">Welcome, <span style="color:var(--gold)">{{ user.name }}</span></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="big-num">{{ stats.users }}</div>
+                <div class="label">Total Users</div>
+                <div class="icon">👤</div>
+            </div>
+            <div class="stat-card">
+                <div class="big-num">{{ stats.treks }}</div>
+                <div class="label">Active Treks</div>
+                <div class="icon">⛰️</div>
+            </div>
+            <div class="stat-card">
+                <div class="big-num">{{ stats.bookings }}</div>
+                <div class="label">Total Bookings</div>
+                <div class="icon">📋</div>
+            </div>
+            <div class="stat-card">
+                <div class="big-num">₹{{ "{:,.0f}".format(stats.revenue) }}</div>
+                <div class="label">Total Revenue</div>
+                <div class="icon">💰</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('treks', this)">Treks</button>
+            <button class="tab" onclick="showTab('bookings', this)">Bookings</button>
+            <button class="tab" onclick="showTab('users', this)">Users</button>
+            <button class="tab" onclick="showTab('contacts', this)">Messages</button>
+            <button class="tab" onclick="showTab('sos', this)">SOS Alerts</button>
+        </div>
+
+        <!-- TREKS TAB -->
+        <div class="tab-content active" id="tab-treks">
+            <div class="add-trek-form">
+                <h3>Add New Trek</h3>
+                <form method="POST" action="/admin/trek/add">
+                    <div class="form-row-3">
+                        <div class="form-group"><label class="form-label">Trek Name</label><input type="text" name="name" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Location</label><input type="text" name="location" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Difficulty</label>
+                            <select name="difficulty" class="form-control">
+                                <option>Easy</option><option>Moderate</option><option>Hard</option><option>Expert</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="3"></textarea></div>
+                    <div class="form-row-3">
+                        <div class="form-group"><label class="form-label">Duration (Days)</label><input type="number" name="duration_days" class="form-control" value="3"></div>
+                        <div class="form-group"><label class="form-label">Price (₹)</label><input type="number" name="price" class="form-control" step="0.01"></div>
+                        <div class="form-group"><label class="form-label">Max Altitude</label><input type="text" name="max_altitude" class="form-control" placeholder="e.g. 4500m"></div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">Latitude</label><input type="number" name="latitude" class="form-control" step="0.000001"></div>
+                        <div class="form-group"><label class="form-label">Longitude</label><input type="number" name="longitude" class="form-control" step="0.000001"></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Image URL</label><input type="url" name="image_url" class="form-control" placeholder="https://..."></div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Trek</button>
+                </form>
+            </div>
+
+            <table class="admin-table">
+                <tr><th>Image</th><th>Name</th><th>Location</th><th>Difficulty</th><th>Price</th><th>Rating</th><th>Actions</th></tr>
+                {% for t in treks %}
+                <tr>
+                    <td><img src="{{ t.image_url }}" alt="{{ t.name }}"></td>
+                    <td style="font-weight:600">{{ t.name }}</td>
+                    <td style="color:var(--lime)">{{ t.location }}</td>
+                    <td><span class="card-badge badge-{{ t.difficulty.lower() }}">{{ t.difficulty }}</span></td>
+                    <td style="color:var(--gold)">₹{{ "{:,.0f}".format(t.price) }}</td>
+                    <td class="stars">★ {{ t.rating }}</td>
+                    <td>
+                        <a href="/trek/{{ t.id }}" class="btn btn-outline" style="padding:0.3rem 0.8rem; font-size:0.7rem">View</a>
+                        <a href="/admin/trek/delete/{{ t.id }}" class="btn btn-danger" style="padding:0.3rem 0.8rem; font-size:0.7rem" onclick="return confirm('Deactivate this trek?')">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- BOOKINGS TAB -->
+        <div class="tab-content" id="tab-bookings">
+            <div style="margin-bottom:2rem;">
+                <h3 style="font-family: Georgia, 'Times New Roman', Times, serif; font-size:1.8rem; letter-spacing:2px; margin-bottom:0.75rem; color:var(--lime);">Monthly Booking Summary</h3>
+                <table class="admin-table" style="margin-bottom:1.5rem;">
+                    <tr><th>Month</th><th>Bookings</th><th>Total People</th><th>Revenue</th></tr>
+                    {% if monthly_reports %}
+                        {% for m in monthly_reports %}
+                        <tr>
+                            <td>{{ m.month_label }}</td>
+                            <td>{{ m.booking_count }}</td>
+                            <td>{{ m.total_people }}</td>
+                            <td style="color:var(--gold); font-weight:600">₹{{ "{:,.0f}".format(m.total_amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="4" style="text-align:center; color:rgba(245,243,239,0.6);">No paid bookings yet to summarize.</td></tr>
+                    {% endif %}
+                </table>
+            </div>
+            <table class="admin-table">
+                <tr><th>#</th><th>User</th><th>Trek</th><th>Date</th><th>People</th><th>Amount</th><th>Payment</th><th>Status</th></tr>
+                {% for b in bookings %}
+                <tr>
+                    <td style="color:rgba(245,243,239,0.3)">{{ b.id }}</td>
+                    <td>{{ b.user_name }}</td>
+                    <td style="font-weight:600; color:var(--lime)">{{ b.trek_name }}</td>
+                    <td>{{ b.trek_date }}</td>
+                    <td>{{ b.num_people }}</td>
+                    <td style="color:var(--gold); font-weight:600">₹{{ "{:,.0f}".format(b.total_amount) }}</td>
+                    <td>{{ b.payment_method|default('demo') }}{% if b.payment_reference %} / {{ b.payment_reference[:20] }}{% endif %}</td>
+                    <td><span class="status-badge status-{{ b.payment_status }}">{{ b.payment_status }}</span></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- USERS TAB -->
+        <div class="tab-content" id="tab-users">
+            <table class="admin-table">
+                <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th></tr>
+                {% for u in users %}
+                <tr>
+                    <td style="color:rgba(245,243,239,0.3)">{{ u.id }}</td>
+                    <td style="font-weight:600">{{ u.name }}</td>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.phone or '—' }}</td>
+                    <td><span class="{{ 'badge-admin' if u.role=='admin' else 'badge-user' }}">{{ u.role }}</span></td>
+                    <td style="color:rgba(245,243,239,0.5)">{{ u.created_at.strftime('%d %b %Y') }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- CONTACTS TAB -->
+        <div class="tab-content" id="tab-contacts">
+            <table class="admin-table">
+                <tr><th>Name</th><th>Email</th><th>Message</th><th>Date</th></tr>
+                {% for c in contacts %}
+                <tr>
+                    <td style="font-weight:600">{{ c.name }}</td>
+                    <td>{{ c.email }}</td>
+                    <td style="color:rgba(245,243,239,0.7); max-width:400px">{{ c.message[:100] }}{% if c.message|length > 100 %}...{% endif %}</td>
+                    <td style="color:rgba(245,243,239,0.4)">{{ c.created_at.strftime('%d %b %Y') }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- SOS TAB -->
+        <div class="tab-content" id="tab-sos">
+            <table class="admin-table">
+                <tr><th>ID</th><th>User</th><th>Location</th><th>Landmark</th><th>Message</th><th>Status</th><th>Time</th></tr>
+                {% for s in sos_alerts %}
+                <tr>
+                    <td style="color:rgba(245,243,239,0.3)">{{ s.id }}</td>
+                    <td>{{ s.user_name or 'Anonymous' }}</td>
+                    <td style="font-family: Georgia, 'Times New Roman', Times, serif; font-size:0.75rem; color:var(--lime)">
+                        {% if s.latitude %}{{ s.latitude }}, {{ s.longitude }}{% else %}Unknown{% endif %}
+                    </td>
+                    <td style="color:rgba(245,243,239,0.7); max-width:180px; font-size:0.85rem;">
+                        {{ s.landmark or '—' }}
+                    </td>
+                    <td style="color:rgba(245,243,239,0.7)">{{ s.message[:80] }}</td>
+                    <td><span class="{{ 'status-active' if s.status=='active' else 'status-resolved' }}">{{ s.status }}</span></td>
+                    <td style="color:rgba(245,243,239,0.4)">{{ s.created_at.strftime('%d %b %Y %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function showTab(name, element) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    if (element) element.classList.add('active');
+    const tab = document.getElementById('tab-' + name);
+    if (tab) tab.classList.add('active');
+}
+</script>
+{% endblock %}

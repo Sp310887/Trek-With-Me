@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="60" viewBox="0 0 260 60">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7ca86c" />
+      <stop offset="100%" stop-color="#c4d277" />
+    </linearGradient>
+  </defs>
+  <rect width="260" height="60" rx="10" ry="10" fill="transparent" />
+  <polygon points="18,10 18,50 48,30" fill="url(#g)" stroke="#c4d277" stroke-width="2" />
+  <text x="62" y="34" font-family="Georgia, 'Times New Roman', Times, serif" font-size="22" font-weight="700" fill="#f5f3ef">Trek</text>
+  <text x="120" y="34" font-family="Georgia, 'Times New Roman', Times, serif" font-size="22" font-weight="700" fill="#d9a24d">WithMe</text>
+</svg>
